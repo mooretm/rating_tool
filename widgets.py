@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 
-class Slider(tk.Frame):
+class RatingSlider(tk.Frame):
     """ A widget for subjective ratings with 
         visual anchors.
     """
@@ -12,25 +12,24 @@ class Slider(tk.Frame):
         slider_args = slider_args or {}
         label_args = label_args or {}
 
-        # Create question label frame
-        lfrm_main = ttk.LabelFrame(self, text=question)
-        lfrm_main.grid(padx=20, pady=(20,0))
+        frm_slider = ttk.LabelFrame(self, text=question, height = 130, width=slider_args['length']+100)
+        frm_slider.grid(row=1, column=0, padx=30, pady=(30,0))
 
-        # Create slider
-        scl_slider = ttk.Scale(lfrm_main, **slider_args)
-        scl_slider.grid(row=1, column=0, columnspan=len(anchors),pady=5)
+        scale_pos = [0, 0.25, 0.5, 0.75, 1]
+        x_vals = []
+        for idx, n in enumerate(scale_pos):
+            x_vals.append(slider_args['length'] * scale_pos[idx])
 
-        # Create verbal anchors
-        for idx, anchor in enumerate(anchors):
-            #x = ((values[idx] - slider_args['from_']) / slider_args['to']) * 
-            # (scl_slider.winfo_width() - slider_args['length']) + slider_args['length'] / 2
-            ttk.Label(lfrm_main, text=anchor, anchor='c', width=15, 
-                **label_args).grid(row=0, column=idx, pady=5)
+        myScale = ttk.Scale(self, **slider_args)
+        myScale.place(in_=frm_slider, relx=0.5, rely=0.5, anchor='c')
+
+        frm_slider.update()
+        offset = (frm_slider.winfo_width() - slider_args['length']) / 2
+
+        for idx, anchor in enumerate(anchors, start=0):
+            ttk.Label(self, text=anchor.split()[0]).place(in_=frm_slider, x=offset+x_vals[idx], rely=0.15, anchor='c')
+            ttk.Label(self, text=anchor.split()[1]).place(in_=frm_slider, x=offset+x_vals[idx], rely=0.3, anchor='c')
 
         # Display slider value
-        frm_rating = ttk.Label(lfrm_main)
-        frm_rating.grid(row=2, column=0, columnspan=len(anchors))
-        ttk.Label(frm_rating, text="Rating: ").grid(row=1, column=0, 
-            sticky='e', pady=(0,10))
-        ttk.Label(frm_rating, textvariable=slider_args['variable']
-            ).grid(row=1, column=1, sticky='w', pady=(0,10))
+        ttk.Label(self, text="Rating:").place(in_=frm_slider, relx=0.5, rely=0.8, anchor='e')
+        ttk.Label(self, textvariable=slider_args['variable']).place(in_=frm_slider, relx=0.53, rely=0.8, anchor='e')

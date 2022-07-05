@@ -1,18 +1,5 @@
-""" Wav-file-based rating task. Wav files are presented 
-    in random order (obviating the need for naming 
-    conventions). Simple GUI with custom rating slider 
-    widgets. Data are saved as .csv.
-
-    Version 1.0.0
-    Written by: Travis M. Moore
-    Created: Jun 29, 2022
-    Last Edited: Jul 1, 2022
-"""
-
 # Import system packages
 import os
-import sys
-from pathlib import Path
 
 # Import GUI packages
 import tkinter as tk
@@ -105,11 +92,12 @@ class Audio:
 
 
 class MainFrame(ttk.Frame):
-    def __init__(self, parents, model, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, parent, model, settings, *args, **kwargs):
+        super().__init__(parent, *args, **kwargs)
 
         self.model = model
-        fields = self.model.fields
+        self.fields = self.model.fields
+        self.settings = settings
 
         # Slider functions
         def get_current_value():
@@ -136,6 +124,9 @@ class MainFrame(ttk.Frame):
             'Somewhat\nAcceptable', 'Moderately\nAcceptable', 
             'Extremely\nAcceptable']
 
+        #aware_anchors = ['Not', 'Slightly', 'Somewhat', 'Moderately', 'Extremely']
+        #accept_anchors = ['Not', 'Slightly', 'Somewhat', 'Moderately', 'Extremely']
+
         # Styles
         style = ttk.Style(self)
         style.configure('TLabel', font=("Helvetica", 11))
@@ -143,7 +134,7 @@ class MainFrame(ttk.Frame):
         style.configure('TButton', font=("Helvetica", 11))
 
         # Awareness Slider
-        w.Slider(self, 
+        w.RatingSlider(self, 
             question="Please rate how aware you were of the transition:",
             anchors=aware_anchors, 
             slider_args={'from_':0, 'to':100, 'length':500, 
@@ -152,7 +143,7 @@ class MainFrame(ttk.Frame):
             ).grid(row=5,column=0)
 
         # Acceptability Slider
-        w.Slider(self, 
+        w.RatingSlider(self, 
             question="Please rate how acceptable the transition was:",
             anchors=accept_anchors, 
             slider_args={'from_':0, 'to':100, 'length':500, 
