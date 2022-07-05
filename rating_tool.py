@@ -18,10 +18,14 @@ import view as v
 import models as m
 from mainmenu import MainMenu
 
+
 class Application(tk.Tk):
     """ Application root window """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self.withdraw()
+        self.title("Rating Tool")
 
         self.settings_model = m.SettingsModel()
         self._load_settings()
@@ -31,6 +35,7 @@ class Application(tk.Tk):
         self.main_frame = v.MainFrame(self, self.model, self.settings)
         self.main_frame.grid(row=1, column=0)
         self.main_frame.bind('<<SaveRecord>>', self._on_submit)
+        print(f"Window width, app, main_frame: {self.main_frame.winfo_width()}")
 
         # Menu
         menu = MainMenu(self, self.settings)
@@ -50,24 +55,20 @@ class Application(tk.Tk):
         # Track trial number
         self._records_saved = 0
 
-        # Set up root window
-        self.title("Rating Tool")
-        self.withdraw()
-        # Center the window
-        self.update_idletasks()
-        # Get current window dimensions
-        window_width = self.winfo_width()
-        window_height = self.winfo_height()
-        # get the screen dimension
-        screen_width = self.winfo_screenwidth()
-        screen_height = self.winfo_screenheight()
-        # find the center point
-        center_x = int(screen_width/2 - window_width / 2)
-        center_y = int(screen_height/2 - window_height / 2)
-        # set the position of the window to the center of the screen
-        self.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
-        #self.resizable(False, False)
+        # # Set up root window
         self.deiconify()
+
+        self.center_window()
+
+
+    def center_window(toplevel):
+        toplevel.update_idletasks()
+        screen_width = toplevel.winfo_screenwidth()
+        screen_height = toplevel.winfo_screenheight()
+        size = tuple(int(_) for _ in toplevel.geometry().split('+')[0].split('x'))
+        x = screen_width/2 - size[0]/2
+        y = screen_height/2 - size[1]/2
+        toplevel.geometry("+%d+%d" % (x, y)) 
 
 
     def _load_settings(self):

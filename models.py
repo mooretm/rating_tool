@@ -1,4 +1,9 @@
 """ Model class """
+# GUI modules
+import tkinter as tk
+from tkinter import ttk
+from tkinter import filedialog
+
 # Import system modules
 import csv
 from pathlib import Path
@@ -7,6 +12,13 @@ import os
 
 # Import data modules
 import json
+
+# Import science modules
+import numpy as np
+from scipy.io import wavfile
+
+# Import audio modules
+import sounddevice as sd
 
 # Import custom modules
 from constants import FieldTypes as FT
@@ -102,3 +114,73 @@ class SettingsModel:
         else:
             raise ValueError("Bad key or wrong variable type")
 
+
+class Audio:
+    """ An object for use with .wav files. Audio objects 
+        can import .wav files, handle audio data type 
+        conversion, and store information about a .wav 
+        file.
+    """
+    def __init__(self):
+        # Initialize attributes
+        self.name = None
+        self.file_path = None
+        self.data_type = None
+        self.fs = None
+        self.dur = None
+        self.t = None
+        self.original_audio = None
+        self.modified_audio = None
+
+        # Dictionary of data types and ranges
+        self.wav_dict = {
+            'float32': (-1.0, 1.0),
+            'int32': (-2147483648, 2147483647),
+            'int16': (-32768, 32767),
+            'uint8': (0, 255)
+        }
+
+
+    def do_import_audio(self):
+        """ Select file using system file dialog 
+            and read it into a dictionary.
+        """
+        file_name = filedialog.askopenfilename()
+        self.file_path = file_name.split(os.sep)
+        just_name = file_name.split('/')[-1]
+        self.name = str(just_name)
+
+        fs, audio_file = wavfile.read(file_name)
+        self.fs = fs
+        self.original_audio = audio_file
+
+        audio_dtype = np.dtype(audio_file[0])
+        self.data_type = audio_dtype
+        print(f"Incoming data type: {audio_dtype}")
+
+        # Immediately convert to float64 for manipulating
+        if audio_dtype == 'float64':
+            pass
+        else:
+            # 1. Convert to float64
+            audio_file = audio_file.astype(np.float64)
+            print(f"Forced audio data type: {type(audio_file[0])}")
+            # 2. Divide by original dtype max val
+            audio_file = audio_file / self.wav_dict[str(audio_dtype)][1]
+            self.modified_audio = audio_file
+
+        self.dur = len(audio_file) / self.fs
+        self.t = np.arange(0,self.dur, 1/self.fs)
+
+
+    def do_convert_to_original_dtype(self):
+        # Convert back to original audio data type
+        print(self.modified_audio)
+        sig = self.modified_audio * self.wav_dict[str(self.data_type)][1]
+        if self.data_type != 'float32':
+            # Round to return to integer values
+            sig = np.round(sig)
+        # Convert back to original data type
+        sig = sig.astype(self.data_type)
+        #print(f"Converted data type: {str(type(sig[0]))}")
+        self.modified_audio = sig
