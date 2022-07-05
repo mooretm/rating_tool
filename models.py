@@ -3,23 +3,18 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
-
 # Import system modules
 import csv
 from pathlib import Path
 from datetime import datetime
 import os
-
 # Import data modules
 import json
-
 # Import science modules
 import numpy as np
 from scipy.io import wavfile
-
 # Import audio modules
 import sounddevice as sd
-
 # Import custom modules
 from constants import FieldTypes as FT
 
@@ -61,22 +56,23 @@ class CSVModel:
 
 class SettingsModel:
     """ A model for saving settings """
-    # fields = {
-    #     'Subject': {'type': 'str', 'value': '999'},
-    #     'Condition': {'type': 'str', 'value': 'Quiet'},
-    #     'Presentation Level': {'type': 'float', 'value': 65},
-    #     'Speaker Number': {'type': 'int', 'value': 1},
-    #     'Audio Files Path': {'type': 'str', 'value': 'Please select a path'}
-    # }
     fields = {
-        'autofill date': {'type': 'bool', 'value': True}
+        'Subject': {'type': 'str', 'value': '999'},
+        'Condition': {'type': 'str', 'value': 'Quiet'},
+        'Presentation Level': {'type': 'float', 'value': 65},
+        'Speaker Number': {'type': 'int', 'value': 1},
+        'Audio Files Path': {'type': 'str', 'value': 'Please select a path'}
     }
+    # fields = {
+    #     'autofill date': {'type': 'bool', 'value': True}
+    # }
 
 
     def __init__(self):
         filename = 'rating_tool.json'
         # Store settings file in user's home directory
         self.filepath = Path.home() / filename
+        print(self.filepath)
         # Load settings file
         self.load()
 
@@ -102,6 +98,7 @@ class SettingsModel:
         """ Save the current settings to the file """
         with open(self.filepath, 'w') as fh:
             json.dump(self.fields, fh)
+            print("Settings file written")
 
     
     def set(self, key, value):
@@ -117,70 +114,65 @@ class SettingsModel:
 
 class Audio:
     """ An object for use with .wav files. Audio objects 
-        can import .wav files, handle audio data type 
+        can read a given .wav file, handle audio data type 
         conversion, and store information about a .wav 
         file.
     """
-    def __init__(self):
-        # Initialize attributes
-        self.name = None
-        self.file_path = None
-        self.data_type = None
-        self.fs = None
-        self.dur = None
-        self.t = None
-        self.original_audio = None
-        self.modified_audio = None
+    # Dictionary of data types and ranges for conversions
+    wav_dict = {
+        'float32': (-1.0, 1.0),
+        'int32': (-2147483648, 2147483647),
+        'int16': (-32768, 32767),
+        'uint8': (0, 255)
+    }
 
-        # Dictionary of data types and ranges
-        self.wav_dict = {
-            'float32': (-1.0, 1.0),
-            'int32': (-2147483648, 2147483647),
-            'int16': (-32768, 32767),
-            'uint8': (0, 255)
-        }
+    def __init__(self, file_path):
+        # Parse file path
+        self.file_path = file_path.split(os.sep) # path only
+        self.name = str(file_path.split(os.sep)[-1]) # file name only
 
+        # Read audio file
+        fs, audio_file = wavfile.read(file_path)
 
-    def do_import_audio(self):
-        """ Select file using system file dialog 
-            and read it into a dictionary.
-        """
-        file_name = filedialog.askopenfilename()
-        self.file_path = file_name.split(os.sep)
-        just_name = file_name.split('/')[-1]
-        self.name = str(just_name)
-
-        fs, audio_file = wavfile.read(file_name)
+        # Assign audio file attributes
         self.fs = fs
         self.original_audio = audio_file
+        self.dur = len(audio_file) / self.fs
+        self.t = np.arange(0,self.dur, 1/self.fs)
+        self.data_type = np.dtype(audio_file[0])
+        print(f"Incoming data type: {self.data_type}")
 
-        audio_dtype = np.dtype(audio_file[0])
-        self.data_type = audio_dtype
-        print(f"Incoming data type: {audio_dtype}")
+        # Immediately convert to float64 for processing
+        self.convert_to_float()
 
-        # Immediately convert to float64 for manipulating
-        if audio_dtype == 'float64':
+
+    def convert_to_float(self):
+        """ Convert original audio data type to float64 
+            for processing
+        """
+        if self.data_type == 'float64':
             pass
         else:
             # 1. Convert to float64
-            audio_file = audio_file.astype(np.float64)
-            print(f"Forced audio data type: {type(audio_file[0])}")
+            audio_file = self.original_audio.astype(np.float64)
             # 2. Divide by original dtype max val
-            audio_file = audio_file / self.wav_dict[str(audio_dtype)][1]
+            audio_file = audio_file / self.wav_dict[str(self.data_type)][1]
             self.modified_audio = audio_file
 
-        self.dur = len(audio_file) / self.fs
-        self.t = np.arange(0,self.dur, 1/self.fs)
+
+    def play(self):
+        """ Present modified audio """
+        sd.play(self.modified_audio, self.fs)
+        sd.wait(self.dur)
 
 
-    def do_convert_to_original_dtype(self):
-        # Convert back to original audio data type
-        print(self.modified_audio)
+    def convert_back(self):
+        """ Convert back to original audio data type """
         sig = self.modified_audio * self.wav_dict[str(self.data_type)][1]
         if self.data_type != 'float32':
             # Round to return to integer values
             sig = np.round(sig)
         # Convert back to original data type
         sig = sig.astype(self.data_type)
-        #print(f"Converted data type: {str(type(sig[0]))}")
+        print(f"Converted data type: {str(type(sig[0]))}")
         self.modified_audio = sig

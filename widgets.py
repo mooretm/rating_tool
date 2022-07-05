@@ -15,8 +15,6 @@ class RatingSlider(tk.Frame):
         frm_slider = ttk.LabelFrame(self, text=question, height = 140, width=slider_args['length']+100)
         frm_slider.grid(row=1, column=0, padx=30, pady=(30,0))
 
-        self.update()
-
         scale_pos = [0, 0.25, 0.5, 0.75, 1]
         x_vals = []
         for idx, n in enumerate(scale_pos):
@@ -26,7 +24,6 @@ class RatingSlider(tk.Frame):
         myScale.place(in_=frm_slider, relx=0.5, rely=0.5, anchor='c')
 
         frm_slider.update()
-        print(f"Slider width, widgets: {frm_slider.winfo_width()}")
         offset = (frm_slider.winfo_width() - slider_args['length']) / 2
 
         for idx, anchor in enumerate(anchors, start=0):
@@ -38,4 +35,3 @@ class RatingSlider(tk.Frame):
         ttk.Label(self, textvariable=slider_args['variable']).place(in_=frm_slider, relx=0.53, rely=0.8, anchor='e')
 
         self.update()
-        print(f"Window width, widgets: {self.winfo_width()}")

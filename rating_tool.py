@@ -35,14 +35,13 @@ class Application(tk.Tk):
         self.main_frame = v.MainFrame(self, self.model, self.settings)
         self.main_frame.grid(row=1, column=0)
         self.main_frame.bind('<<SaveRecord>>', self._on_submit)
-        print(f"Window width, app, main_frame: {self.main_frame.winfo_width()}")
 
         # Menu
         menu = MainMenu(self, self.settings)
         self.config(menu=menu)
         # Create callback dictionary
         event_callbacks = {
-            '<<FileSelect>>': self._on_submit,
+            '<<FileSession>>': self._on_submit,
             '<<FileQuit>>': lambda _: self.quit()
         }
         # Bind callbacks to sequences
@@ -72,29 +71,22 @@ class Application(tk.Tk):
 
 
     def _load_settings(self):
-        """ Load settings into settings dictionary above """
-        # Dictionary to translate 'type' strings into tkinter 
-        # control variable types
+        """Load settings into our self.settings dict."""
+
         vartypes = {
-            'bool': tk.BooleanVar(),
-            'str': tk.StringVar(),
-            'int': tk.IntVar(),
-            'float': tk.DoubleVar()
+        'bool': tk.BooleanVar,
+        'str': tk.StringVar,
+        'int': tk.IntVar,
+        'float': tk.DoubleVar
         }
-        # Create empty dictionary to store settings
+
+        # Create dict of settings variables from the model's settings.
         self.settings = dict()
-        # Iterate through settings_model and create matching 
-        # control varaible for each field
         for key, data in self.settings_model.fields.items():
-            # If there's a datatype that doesn't match, assign StringVar
             vartype = vartypes.get(data['type'], tk.StringVar)
-            #self.settings[key] = vartype(value=data['value'])
+            self.settings[key] = vartype(value=data['value'])
 
-            vartype.set(data['value'])
-            self.settings[key] = vartype
-
-            #self.settings[key] = vartype.set(data['value'])
-        # Add a trace to call '_save_settings' whenever a variable is changed
+        # Put a trace on the variables so they get stored when changed.
         for var in self.settings.values():
             var.trace_add('write', self._save_settings)
 

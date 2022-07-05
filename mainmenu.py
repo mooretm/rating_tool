@@ -20,8 +20,8 @@ class MainMenu(tk.Menu):
         # File menu
         file_menu = tk.Menu(self, tearoff=False)
         file_menu.add_command(
-            label="Select file...",
-            command=self._event('<<FileSelect>>')
+            label="Session...",
+            command=self._event('<<FileSession>>')
         )
         file_menu.add_separator()
         file_menu.add_command(
