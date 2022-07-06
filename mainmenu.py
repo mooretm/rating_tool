@@ -12,10 +12,11 @@ class MainMenu(tk.Menu):
             root.event_generate(sequence)
         return callback
 
-    def __init__(self, parent, settings, **kwargs):
+    def __init__(self, parent, settings, sessionpars, **kwargs):
         super().__init__(parent, **kwargs)
 
         self.settings = settings
+        self.sessionpars = sessionpars
 
         # File menu
         file_menu = tk.Menu(self, tearoff=False)
@@ -44,7 +45,7 @@ class MainMenu(tk.Menu):
             'Written by: Travis M. Moore\n'
             'Version 1.0.0\n'
             'Created: Jul 1, 2022\n'
-            'Last Edited: Jul 4, 2022'
+            'Last Edited: Jul 5, 2022'
         )
         messagebox.showinfo(
             title='About',

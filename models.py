@@ -54,18 +54,72 @@ class CSVModel:
             csvwriter.writerow(data)
 
 
-class SettingsModel:
-    """ A model for saving settings """
+class SessionParsModel:
+    """ A model for saving session parameters """
     fields = {
         'Subject': {'type': 'str', 'value': '999'},
         'Condition': {'type': 'str', 'value': 'Quiet'},
-        'Presentation Level': {'type': 'float', 'value': 65},
+        'Presentation Level': {'type': 'float', 'value': -50},
         'Speaker Number': {'type': 'int', 'value': 1},
         'Audio Files Path': {'type': 'str', 'value': 'Please select a path'}
     }
-    # fields = {
-    #     'autofill date': {'type': 'bool', 'value': True}
-    # }
+
+
+    def __init__(self):
+        filename = 'rating_tool_pars.json'
+        # Store settings file in user's home directory
+        self.filepath = Path.home() / filename
+        # Load settings file
+        self.load()
+
+
+    def load(self):
+        """ Load the settings from the file """
+        print("Models_78: Checking for pars file...")
+        # If the file doesn't exist, return
+        if not self.filepath.exists():
+            return
+
+        # Open the file and read in the raw values
+        print("Models_84: File found - reading raw vals from pars file...")
+        with open(self.filepath, 'r') as fh:
+            raw_values = json.load(fh)
+
+        # Don't implicitly trust the raw values; only get known keys
+        print("Models_89: Loading raw vals into sessionpars model if they match model keys")
+        for key in self.fields:
+            if key in raw_values and 'value' in raw_values[key]:
+                raw_value = raw_values[key]['value']
+                self.fields[key]['value'] = raw_value
+
+
+    def save(self):
+        """ Save the current settings to the file """
+        print("Models_98: Writing session pars from model to file...")
+        with open(self.filepath, 'w') as fh:
+            json.dump(self.fields, fh)
+        
+    
+    def set(self, key, value):
+        """ Set a variable value """
+        print("Models_105: Setting sessionpars model fields with running vals...")
+        if (
+            key in self.fields and 
+            type(value).__name__ == self.fields[key]['type']
+        ):
+            self.fields[key]['value'] = value
+        else:
+            raise ValueError("Bad key or wrong variable type")
+
+
+
+
+
+class SettingsModel:
+    """ A model for saving settings """
+    fields = {
+        'autofill date': {'type': 'bool', 'value': True}
+    }
 
 
     def __init__(self):

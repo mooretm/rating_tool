@@ -6,6 +6,9 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 from tkinter import filedialog
+from tkinter.simpledialog import Dialog
+
+from pyparsing import col
 
 # Custom widgets
 import widgets as w
@@ -19,12 +22,13 @@ from matplotlib.backends.backend_tkagg import (
 
 
 class MainFrame(ttk.Frame):
-    def __init__(self, parent, model, settings, *args, **kwargs):
+    def __init__(self, parent, model, settings, sessionpars, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
 
         self.model = model
         self.fields = self.model.fields
         self.settings = settings
+        self.sessionpars = sessionpars
 
         # Slider functions
         def get_current_value():
@@ -126,4 +130,69 @@ class MainFrame(ttk.Frame):
         self.btn_play.focus()
 
 
+class SessionParams(Dialog):
+    """ A dialog that asks for session parameters """
+    def __init__(self, parent, sessionpars, title, error=''):
+        self.sessionpars = sessionpars
+        self._error = tk.StringVar(value=error)
+        super().__init__(parent, title=title)
 
+    def body(self, frame):
+        options = {'padx':5, 'pady':5}
+        ttk.Label(frame, text="Please Enter Session Parameters").grid(row=0, column=0, columnspan=3, **options)
+        if self._error.get():
+            ttk.Label(frame, textvariable=self._error).grid(row=1, column=0, **options)
+
+        # Subject
+        ttk.Label(frame, text="Subject:"
+            ).grid(row=2, column=0, sticky='e', **options)
+        ttk.Entry(frame, width=20, 
+            textvariable=self.sessionpars['Subject']
+            ).grid(row=2, column=1, sticky='w')
+        
+        # Condition
+        ttk.Label(frame, text="Condition:"
+            ).grid(row=3, column=0, sticky='e', **options)
+        ttk.Entry(frame, width=20, 
+            textvariable=self.sessionpars['Condition']
+            ).grid(row=3, column=1, sticky='w')
+
+        # Level
+        ttk.Label(frame, text="Level:"
+            ).grid(row=4, column=0, sticky='e', **options)
+        ttk.Entry(frame, width=20, 
+            textvariable=self.sessionpars['Presentation Level']
+            ).grid(row=4, column=1, sticky='w')
+
+        # Directory
+        frm_path = ttk.Frame(frame)
+        frm_path.grid(row=3, column=1)
+        ttk.Label(frame, text="Path:"
+            ).grid(row=5, column=0, sticky='e', **options)
+        ttk.Label(frame, textvariable=self.sessionpars['Audio Files Path'], 
+            borderwidth=2, relief="solid", width=60
+            ).grid(row=5, column=1, sticky='w')
+        ttk.Button(frame, text="Browse", command=self._get_directory
+            ).grid(row=6, column=1, sticky='w')
+
+    def _get_directory(self):
+        # Ask user to specify audio files directory
+        self.sessionpars['Audio Files Path'].set(filedialog.askdirectory())
+
+
+    def ok(self):
+        print("View:184: Sending save event...")
+        self.parent.event_generate('<<ParsDialogOk>>')
+        self.destroy()
+
+    
+    def cancel(self):
+        print("View:190: Sending load event...")
+        self.parent.event_generate('<<ParsDialogCancel>>')
+        self.destroy()
+
+
+    # def apply(self):
+    #     # Send event to main window on "ok"
+    #     #self.parent.event_generate('<<ParsDialogOk>>')
+    #     pass
