@@ -1,19 +1,26 @@
 """ Wav-file-based rating task. Wav files are presented 
     in random order (obviating the need for naming 
-    conventions). Simple GUI with custom rating slider 
-    widgets. Data are saved as .csv files.
+    conventions). Custom rating slider widgets. Data 
+    are saved as .csv files.
 
     Version 1.0.0
     Written by: Travis M. Moore
     Created: Jun 29, 2022
-    Last Edited: Jul 4, 2022
+    Last Edited: Jul 6, 2022
 """
 
-# Import GUI packages
+# Import GUI modules
 import tkinter as tk
 from tkinter import ttk
 
-# Custom modules
+# Import system modules
+import os
+from tkinter import messagebox
+
+# Import data science modules
+import random
+
+# Import custom modules
 import view as v
 import models as m
 from mainmenu import MainMenu
@@ -34,14 +41,16 @@ class Application(tk.Tk):
         # Load current session parameters (or defaults)
         self.sessionpars_model = m.SessionParsModel()
         self._load_sessionpars()
-        # Show session parameters dialog
-        #self._show_sessionpars()
+
+        # NOTE: can't show sessionpars dialog yet because
+        # there's no parent to pass the event to!
 
         # Initialize objects
         self.model = m.CSVModel()
         self.main_frame = v.MainFrame(self, self.model, self.settings, self.sessionpars)
         self.main_frame.grid(row=1, column=0)
         self.main_frame.bind('<<SaveRecord>>', self._on_submit)
+        self.main_frame.bind('<<PlayAudio>>', self._on_play)
 
         # Menu
         menu = MainMenu(self, self.settings, self.sessionpars)
@@ -63,6 +72,9 @@ class Application(tk.Tk):
         # Track trial number
         self._records_saved = 0
 
+        # List to hold randomized audio files
+        self._audio_list = []
+
         # # Set up root window
         self.deiconify()
 
@@ -70,6 +82,7 @@ class Application(tk.Tk):
 
 
     def center_window(toplevel):
+        """ Center the root window """
         toplevel.update_idletasks()
         screen_width = toplevel.winfo_screenwidth()
         screen_height = toplevel.winfo_screenheight()
@@ -80,12 +93,13 @@ class Application(tk.Tk):
 
 
     def _show_sessionpars(self):
+        """ Show the session parameters dialog """
         print("App_83: Calling sessionpars dialog...")
-        v.SessionParams(self, sessionpars=self.sessionpars, title="Session", error='')
+        v.SessionParams(self, sessionpars=self.sessionpars, title="Parameters", error='')
 
 
     def _load_sessionpars(self):
-        """Load parameters into self.settings dict."""
+        """Load parameters into self.sessionpars dict."""
         #print("App:89: Creating running dict from sessionpars model fields...")
         vartypes = {
         'bool': tk.BooleanVar,
@@ -114,6 +128,55 @@ class Application(tk.Tk):
             self.sessionpars_model.save()
 
 
+    def _on_submit(self, *_):
+        """ Save trial ratings, update trial counter,
+            and reset sliders.
+         """
+        data = self.main_frame.get()
+        self.model.save_record(data)
+        self._records_saved += 1
+        self.status.set(f"Trials Completed: {self._records_saved}")
+        self.main_frame.reset()
+
+
+    def _on_play(self, *_):
+        """ Present audio """
+        # If start of block, check for valid audio file list
+        if self._records_saved == 0:
+            if len(self._audio_list) > 0:
+                pass
+            else:
+                self._mk_audiolist()
+        # If trial number is < total audio files, present audio file
+        if self._records_saved < len(self._audio_list):
+            file_path = self.sessionpars['Audio Files Path'].get() + os.sep + self._audio_list[self._records_saved]
+            # Audio object expects a full file path and a presentation level
+            audio_obj = m.Audio(file_path, self.sessionpars['Presentation Level'].get())
+            audio_obj.setRMS()
+            audio_obj.play()
+        else:
+            messagebox.showinfo(
+                title="Done!",
+                message="You have finished this task!\n"
+                "Please let the experimenter know."
+            )
+            self.root_quit()
+
+
+    def _mk_audiolist(self):
+        """ Get audio files and randomize list """
+        # If a valid path has been given, get the files
+        try:
+            self._audio_list = os.listdir(self.sessionpars['Audio Files Path'].get())
+            random.shuffle(self._audio_list)
+            print("Loaded and randomized audio files!")
+        except:
+            print("No valid path for audio files!")
+
+
+    def root_quit(self):
+        """ Exit the program """
+        self.destroy()
 
 
 
@@ -146,32 +209,6 @@ class Application(tk.Tk):
         for key, variable in self.settings.items():
             self.settings_model.set(key, variable.get())
             self.settings_model.save()
-
-
-
-
-
-
-
-    def _on_submit(self, *_):
-        """ Save trial ratings, update trial counter,
-            and reset sliders.
-         """
-        data = self.main_frame.get()
-        self.model.save_record(data)
-        self._records_saved += 1
-        self.status.set(f"Trials Completed: {self._records_saved}")
-        self.main_frame.reset()
-
-
-    # def _on_import(self):
-    #     global audio_obj
-    #     audio_obj = Audio()
-    #     audio_obj.do_import_audio()
-
-    #     self.main_frame._vars['In Name'].set(f'Name: {audio_obj.name}')
-    #     self.main_frame._vars['In Data Type'].set(f'Data Type: {audio_obj.data_type}')
-    #     self.main_frame._vars['In Sampling Rate'].set(f'Sampling Rate (Hz): {audio_obj.fs}')
 
 
 if __name__ == "__main__":

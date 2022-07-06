@@ -4,11 +4,8 @@ import os
 # Import GUI packages
 import tkinter as tk
 from tkinter import ttk
-from tkinter import messagebox
 from tkinter import filedialog
 from tkinter.simpledialog import Dialog
-
-from pyparsing import col
 
 # Custom widgets
 import widgets as w
@@ -62,7 +59,7 @@ class MainFrame(ttk.Frame):
         style.configure('TButton', font=("Helvetica", 11))
 
         # Awareness Slider
-        sldr_aware = w.RatingSlider(self, 
+        w.RatingSlider(self, 
             question="Please rate how aware you were of the transition:",
             anchors=aware_anchors, 
             slider_args={'from_':0, 'to':100, 'length':500, 
@@ -71,7 +68,7 @@ class MainFrame(ttk.Frame):
             ).grid(row=5,column=0)
 
         # Acceptability Slider
-        sldr_accept = w.RatingSlider(self, 
+        w.RatingSlider(self, 
             question="Please rate how acceptable the transition was:",
             anchors=accept_anchors, 
             slider_args={'from_':0, 'to':100, 'length':500, 
@@ -97,10 +94,10 @@ class MainFrame(ttk.Frame):
         """ Present audio. Can be repeated as many times as 
             the listener wants.
         """
-        # Enable submit button after listening at least once
+        # Enable submit button after listening
         self.btn_submit.config(state="enabled")
-
         # Play audio
+        self.event_generate('<<PlayAudio>>')
 
     
     def _on_submit(self):
@@ -165,14 +162,15 @@ class SessionParams(Dialog):
             ).grid(row=4, column=1, sticky='w')
 
         # Directory
-        frm_path = ttk.Frame(frame)
-        frm_path.grid(row=3, column=1)
-        ttk.Label(frame, text="Path:"
+        frm_path = ttk.LabelFrame(frame, text="Please select audio file directory")
+        frm_path.grid(row=5, column=0, columnspan=2, **options, ipadx=5, ipady=5)
+        my_frame = frame
+        ttk.Label(my_frame, text="Path:"
             ).grid(row=5, column=0, sticky='e', **options)
-        ttk.Label(frame, textvariable=self.sessionpars['Audio Files Path'], 
+        ttk.Label(my_frame, textvariable=self.sessionpars['Audio Files Path'], 
             borderwidth=2, relief="solid", width=60
             ).grid(row=5, column=1, sticky='w')
-        ttk.Button(frame, text="Browse", command=self._get_directory
+        ttk.Button(my_frame, text="Browse", command=self._get_directory
             ).grid(row=6, column=1, sticky='w')
 
     def _get_directory(self):
