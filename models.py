@@ -1,5 +1,6 @@
-""" Model class """
-# Import system modules
+""" Model class for Rating Tool """
+
+# Import system packages
 import csv
 from pathlib import Path
 from datetime import datetime
@@ -7,15 +8,36 @@ import os
 # Import data science packages
 import numpy as np
 import matplotlib.pyplot as plt
-# Import data modules
+# Import data packages
 import json
-# Import science modules
+# Import science packages
 import numpy as np
+import random
 from scipy.io import wavfile
-# Import audio modules
+# Import audio packages
 import sounddevice as sd
 # Import custom modules
 from constants import FieldTypes as FT
+
+
+class AudioList:
+    """ Get audio files and randomize list """
+    fields = {'Audio List': []}
+
+    def __init__(self, sessionpars):
+        
+        self.sessionpars = sessionpars
+
+        print("Models_32: Checking for audio files dir...")
+        # If the file doesn't exist, return
+        if not os.path.exists(self.sessionpars['Audio Files Path'].get()):
+            print("Models_34: Not a valid audio files directory!")
+            return
+        # If a valid path has been given, get the files
+        self.fields['Audio List'] = os.listdir(self.sessionpars['Audio Files Path'].get())
+        random.shuffle(self.fields['Audio List'])
+        print("Models_39: Loaded randomized audio files into AudioList model")
+        #print(self.fields['Audio List'])
 
 
 class CSVModel:
@@ -218,18 +240,18 @@ class Audio:
     def play(self):
         """ Present working audio """
         print(f"Presenting audio data type: {np.dtype(self.working_audio[0])}")
+        # plt.subplot(1,3,1)
+        # plt.plot(self.original_audio)
+        # plt.subplot(1,3,2)
+        # plt.plot(self.working_audio)
+
         sig = self.setRMS()
-
-        plt.subplot(1,3,1)
-        plt.plot(self.original_audio)
-        plt.subplot(1,3,2)
-        plt.plot(self.working_audio)
-
         self.working_audio = sig
 
-        plt.subplot(1,3,3)
-        plt.plot(self.working_audio)
-        plt.show()
+        # plt.subplot(1,3,3)
+        # plt.plot(self.working_audio)
+        # plt.show()
+
         sd.play(self.working_audio, self.fs)
         #sd.wait(self.dur+0.5)
 

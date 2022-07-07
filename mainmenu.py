@@ -1,6 +1,9 @@
-""" The Main Menu class for ABQ Data Entry """
+""" The Main Menu class for Rating Tool """
+
+# Import GUI packages
 import tkinter as tk
 from tkinter import messagebox
+
 
 class MainMenu(tk.Menu):
     """ Main Menu """
@@ -45,7 +48,7 @@ class MainMenu(tk.Menu):
             'Written by: Travis M. Moore\n'
             'Version 1.0.0\n'
             'Created: Jul 1, 2022\n'
-            'Last Edited: Jul 5, 2022'
+            'Last Edited: Jul 7, 2022'
         )
         messagebox.showinfo(
             title='About',

@@ -54,9 +54,9 @@ class MainFrame(ttk.Frame):
 
         # Styles
         style = ttk.Style(self)
-        style.configure('TLabel', font=("Helvetica", 11))
-        style.configure('TLabelframe.Label', font=("Helvetica", 12))
-        style.configure('TButton', font=("Helvetica", 11))
+        style.configure('TLabel', font=("Helvetica", 10))
+        style.configure('TLabelframe.Label', font=("Helvetica", 11))
+        style.configure('TButton', font=("Helvetica", 10))
 
         # Awareness Slider
         w.RatingSlider(self, 
@@ -94,10 +94,10 @@ class MainFrame(ttk.Frame):
         """ Present audio. Can be repeated as many times as 
             the listener wants.
         """
-        # Enable submit button after listening
-        self.btn_submit.config(state="enabled")
         # Play audio
         self.event_generate('<<PlayAudio>>')
+        # Enable submit button after listening
+        #self.btn_submit.config(state="enabled")
 
     
     def _on_submit(self):

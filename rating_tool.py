@@ -6,18 +6,18 @@
     Version 1.0.0
     Written by: Travis M. Moore
     Created: Jun 29, 2022
-    Last Edited: Jul 6, 2022
+    Last Edited: Jul 7, 2022
 """
 
-# Import GUI modules
+# Import GUI packages
 import tkinter as tk
 from tkinter import ttk
 
-# Import system modules
+# Import system packages
 import os
 from tkinter import messagebox
 
-# Import data science modules
+# Import data science packages
 import random
 
 # Import custom modules
@@ -32,7 +32,7 @@ class Application(tk.Tk):
         super().__init__(*args, **kwargs)
 
         self.withdraw()
-        self.title("Rating Tool")
+        self.title("Slider Rating Tool")
 
         # Not really using this here
         self.settings_model = m.SettingsModel()
@@ -41,6 +41,11 @@ class Application(tk.Tk):
         # Load current session parameters (or defaults)
         self.sessionpars_model = m.SessionParsModel()
         self._load_sessionpars()
+
+        # Make audio files list model
+        self._audio_list = []
+        self.audiolist_model = m.AudioList(self.sessionpars)
+        self._load_audiolist_model()
 
         # NOTE: can't show sessionpars dialog yet because
         # there's no parent to pass the event to!
@@ -71,9 +76,6 @@ class Application(tk.Tk):
         ttk.Label(self, textvariable=self.status).grid(sticky='w', padx=30, pady=(0,10))
         # Track trial number
         self._records_saved = 0
-
-        # List to hold randomized audio files
-        self._audio_list = []
 
         # # Set up root window
         self.deiconify()
@@ -128,6 +130,20 @@ class Application(tk.Tk):
             self.sessionpars_model.save()
 
 
+    def _load_audiolist_model(self):
+        self.audiolist_model = m.AudioList(self.sessionpars)
+        print(f"App_136: Audio files path: {self.sessionpars['Audio Files Path'].get()}")
+        self._audio_list = self.audiolist_model.fields['Audio List']
+        if len(self._audio_list) > 0:
+            print("App:136: Loaded randomized audio files from AudioList model into running list")
+        else:
+            print("App_138: No audio files in list!")
+            messagebox.showwarning(
+                title="No path selected",
+                message="Please use File>Session to selected a valid audio file directory!"
+            )
+
+
     def _on_submit(self, *_):
         """ Save trial ratings, update trial counter,
             and reset sliders.
@@ -140,41 +156,31 @@ class Application(tk.Tk):
 
 
     def _on_play(self, *_):
-        """ Present audio """
-        # If start of block, check for valid audio file list
-        if self._records_saved == 0:
-            if len(self._audio_list) > 0:
-                pass
-            else:
-                self._mk_audiolist()
-        # If trial number is < total audio files, present audio file
-        if self._records_saved < len(self._audio_list):
-            file_path = self.sessionpars['Audio Files Path'].get() + os.sep + self._audio_list[self._records_saved]
-            # Audio object expects a full file path and a presentation level
-            audio_obj = m.Audio(file_path, self.sessionpars['Presentation Level'].get())
-            audio_obj.setRMS()
-            audio_obj.play()
-        else:
-            messagebox.showinfo(
-                title="Done!",
-                message="You have finished this task!\n"
-                "Please let the experimenter know."
-            )
-            self.root_quit()
+        """ Get next .wav file name and present audio """
+        # If empty files list, try loading again
+        if len(self._audio_list) == 0:
+            print("App_180: Empty list - attempting to load audio files from directory")
+            self._load_audiolist_model()
+
+        if len(self._audio_list) > 0:
+            # Check index of next file with list
+            if self._records_saved < len(self._audio_list):
+                file_path = self.sessionpars['Audio Files Path'].get() + os.sep + self._audio_list[self._records_saved]
+                # Audio object expects a full file path and a presentation level
+                audio_obj = m.Audio(file_path, self.sessionpars['Presentation Level'].get())
+                audio_obj.play()
+                # Enable submit button on successful presentation
+                self.main_frame.btn_submit.config(state="enabled")
+            elif self._records_saved >= len(self._audio_list):
+                messagebox.showinfo(
+                    title="Done!",
+                    message="You have finished this task!\n"
+                    "Please let the experimenter know."
+                )
+                self._quit()
 
 
-    def _mk_audiolist(self):
-        """ Get audio files and randomize list """
-        # If a valid path has been given, get the files
-        try:
-            self._audio_list = os.listdir(self.sessionpars['Audio Files Path'].get())
-            random.shuffle(self._audio_list)
-            print("Loaded and randomized audio files!")
-        except:
-            print("No valid path for audio files!")
-
-
-    def root_quit(self):
+    def _quit(self):
         """ Exit the program """
         self.destroy()
 

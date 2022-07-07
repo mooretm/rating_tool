@@ -1,3 +1,6 @@
+""" Custom widgets for Rating Tool """
+
+# Import GUI packages
 import tkinter as tk
 from tkinter import ttk
 
