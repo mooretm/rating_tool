@@ -51,7 +51,7 @@ class Application(tk.Tk):
         # there's no parent to pass the event to!
 
         # Initialize objects
-        self.model = m.CSVModel()
+        self.model = m.CSVModel(self.sessionpars)
         self.main_frame = v.MainFrame(self, self.model, self.settings, self.sessionpars)
         self.main_frame.grid(row=1, column=0)
         self.main_frame.bind('<<SaveRecord>>', self._on_submit)

@@ -42,9 +42,22 @@ class AudioList:
 
 class CSVModel:
     """ CSV file storage """
-    def __init__(self):
-        datestring = datetime.today().strftime("%Y_%m_%d")
-        filename = "ratings_{}.csv".format(datestring)
+    def __init__(self, sessionpars):
+
+        # Initialize sessionpars
+        self.sessionpars = sessionpars
+
+    # Data dictionary
+    fields = {
+        "Awareness Rating": {'req': True, 'type': FT.decimal},
+        "Acceptability Rating": {'req': True, 'type': FT.decimal}
+        }
+
+    
+    def save_record(self, data):
+        """ Save a dictionary of data to .csv file """
+        datestamp = datetime.now().strftime("%Y_%b_%d_%H%M")
+        filename = f"{datestamp}_{self.sessionpars['Condition'].get()}_{self.sessionpars['Subject'].get()}.csv"
         self.file = Path(filename)
 
         # Check for write access to store csv
@@ -58,21 +71,35 @@ class CSVModel:
             msg = f"Permission denied accessing file: {filename}"
             raise PermissionError(msg)
 
-    # Data dictionary
-    fields = {
-        "Awareness Rating": {'req': True, 'type': FT.decimal},
-        "Acceptability Rating": {'req': True, 'type': FT.decimal}
-        }
+        # Combine rating data and session parameters
+        # 1. Create temp sessionpars dict to avoid changing runtime vals
+        # 2. Get actual sessionpars values (not tk controls)
+        temp_sessionpars = dict()
+        for key in self.sessionpars:
+            temp_sessionpars[key] = self.sessionpars[key].get()
 
-    
-    def save_record(self, data):
-        """ Save a dictionary of data to .csv file """
+        # Add rating data to the end of the sessionpars dict
+        temp_sessionpars.update(data)
+
+        # Reformat keys as variables
+        keys = temp_sessionpars.keys()
+        keys_formatted = [x.lower().replace(' ', '_') for x in keys]
+
+        # Make a new dictionary with the formatted keys
+        all_data = dict()
+        for idx, key in enumerate(keys):
+            all_data[keys_formatted[idx]] = temp_sessionpars[key]
+        # Get rid of audio files dir
+        all_data.pop('audio_files_path')
+
+        # Save all data to file
         newfile = not self.file.exists()
         with open(self.file, 'a', newline='') as fh:
-            csvwriter = csv.DictWriter(fh, fieldnames=self.fields.keys())
+            #csvwriter = csv.DictWriter(fh, fieldnames=self.fields.keys())
+            csvwriter = csv.DictWriter(fh, fieldnames=all_data.keys())
             if newfile:
                 csvwriter.writeheader()
-            csvwriter.writerow(data)
+            csvwriter.writerow(all_data)
 
 
 class SessionParsModel:

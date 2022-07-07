@@ -1,5 +1,4 @@
-# Import system packages
-import os
+""" View for Rating Tool """
 
 # Import GUI packages
 import tkinter as tk
@@ -27,7 +26,7 @@ class MainFrame(ttk.Frame):
         self.settings = settings
         self.sessionpars = sessionpars
 
-        # Slider functions
+
         def get_current_value():
             """ Retrieves current slider values """
             return int(self._vars['Awareness Rating'].get()), int(self._vars['Acceptability Rating'].get())
@@ -53,6 +52,7 @@ class MainFrame(ttk.Frame):
             'Extremely\nAcceptable']
 
         # Styles
+        # These are global settings
         style = ttk.Style(self)
         style.configure('TLabel', font=("Helvetica", 10))
         style.configure('TLabelframe.Label', font=("Helvetica", 11))
@@ -94,13 +94,12 @@ class MainFrame(ttk.Frame):
         """ Present audio. Can be repeated as many times as 
             the listener wants.
         """
-        # Play audio
+        # Send play audio event to app
         self.event_generate('<<PlayAudio>>')
-        # Enable submit button after listening
-        #self.btn_submit.config(state="enabled")
 
     
     def _on_submit(self):
+        # Send save data event to app
         self.event_generate('<<SaveRecord>>')
 
 
@@ -120,7 +119,6 @@ class MainFrame(ttk.Frame):
         """ Clear all values """   
         for var in self._vars.values():
             var.set(50)
-
         # Disable submit button on press
         # Set focus to play button
         self.btn_submit.config(state="disabled")
