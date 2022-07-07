@@ -1,4 +1,5 @@
-""" Wav-file-based rating task. Wav files are presented 
+""" Rating Sliders:
+    Wav-file-based rating task. Wav files are presented 
     in random order (obviating the need for naming 
     conventions). Custom rating slider widgets. Data 
     are saved as .csv files.
@@ -21,7 +22,7 @@ from tkinter import messagebox
 import random
 
 # Import custom modules
-import view as v
+import views as v
 import models as m
 from mainmenu import MainMenu
 
@@ -32,7 +33,7 @@ class Application(tk.Tk):
         super().__init__(*args, **kwargs)
 
         self.withdraw()
-        self.title("Slider Rating Tool")
+        self.title("Rating Sliders")
 
         # Not really using this here
         self.settings_model = m.SettingsModel()

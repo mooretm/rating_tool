@@ -1,4 +1,4 @@
-""" View for Rating Tool """
+""" View for Rating Sliders """
 
 # Import GUI packages
 import tkinter as tk

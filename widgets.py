@@ -1,4 +1,4 @@
-""" Custom widgets for Rating Tool """
+""" Custom widgets for Rating Sliders """
 
 # Import GUI packages
 import tkinter as tk

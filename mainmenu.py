@@ -1,4 +1,4 @@
-""" The Main Menu class for Rating Tool """
+""" The Main Menu class for Rating Sliders """
 
 # Import GUI packages
 import tkinter as tk
@@ -43,11 +43,11 @@ class MainMenu(tk.Menu):
 
     def show_about(self):
         """ Show the about dialog """
-        about_message = 'Rating Tool'
+        about_message = 'Rating Sliders'
         about_detail = (
             'Written by: Travis M. Moore\n'
             'Version 1.0.0\n'
-            'Created: Jul 1, 2022\n'
+            'Created: Jun 29, 2022\n'
             'Last Edited: Jul 7, 2022'
         )
         messagebox.showinfo(

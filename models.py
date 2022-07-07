@@ -1,4 +1,4 @@
-""" Model class for Rating Tool """
+""" Model class for Rating Sliders """
 
 # Import system packages
 import csv
@@ -47,6 +47,8 @@ class CSVModel:
         # Initialize sessionpars
         self.sessionpars = sessionpars
 
+        self.datestamp = datetime.now().strftime("%Y_%b_%d_%H%M")
+
     # Data dictionary
     fields = {
         "Awareness Rating": {'req': True, 'type': FT.decimal},
@@ -56,8 +58,7 @@ class CSVModel:
     
     def save_record(self, data):
         """ Save a dictionary of data to .csv file """
-        datestamp = datetime.now().strftime("%Y_%b_%d_%H%M")
-        filename = f"{datestamp}_{self.sessionpars['Condition'].get()}_{self.sessionpars['Subject'].get()}.csv"
+        filename = f"{self.datestamp}_{self.sessionpars['Condition'].get()}_{self.sessionpars['Subject'].get()}.csv"
         self.file = Path(filename)
 
         # Check for write access to store csv
