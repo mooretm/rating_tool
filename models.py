@@ -28,7 +28,7 @@ class AudioList:
         
         self.sessionpars = sessionpars
 
-        print("Models_32: Checking for audio files dir...")
+        print("Models_31: Checking for audio files dir...")
         # If the file doesn't exist, return
         if not os.path.exists(self.sessionpars['Audio Files Path'].get()):
             print("Models_34: Not a valid audio files directory!")
@@ -82,21 +82,26 @@ class CSVModel:
         # Add rating data to the end of the sessionpars dict
         temp_sessionpars.update(data)
 
-        # Reformat keys as variables
+        # Reformat keys for easy import
         keys = temp_sessionpars.keys()
+        # Make all lowercase and replace spaces with underscores
         keys_formatted = [x.lower().replace(' ', '_') for x in keys]
 
         # Make a new dictionary with the formatted keys
         all_data = dict()
         for idx, key in enumerate(keys):
             all_data[keys_formatted[idx]] = temp_sessionpars[key]
-        # Get rid of audio files dir
+        # Remove audio files dir from dictionary
+        # (No need to write the dir to file)
         all_data.pop('audio_files_path')
 
-        # Save all data to file
+        # Create new field for trailing underscore naming
+        # See naming convention info above
+
+
+        # Save combined dict to file
         newfile = not self.file.exists()
         with open(self.file, 'a', newline='') as fh:
-            #csvwriter = csv.DictWriter(fh, fieldnames=self.fields.keys())
             csvwriter = csv.DictWriter(fh, fieldnames=all_data.keys())
             if newfile:
                 csvwriter.writeheader()
