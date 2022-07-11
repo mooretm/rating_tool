@@ -42,6 +42,7 @@ class MainFrame(ttk.Frame):
         self._vars = {
             'Awareness Rating': tk.DoubleVar(value=50),
             'Acceptability Rating': tk.DoubleVar(value=50),
+            'Audio Filename': tk.StringVar()
         }
 
         # Verbal anchors

@@ -7,7 +7,7 @@
     Version 1.0.0
     Written by: Travis M. Moore
     Created: Jun 29, 2022
-    Last Edited: Jul 7, 2022
+    Last Edited: Jul 11, 2022
 """
 
 # Import GUI packages
@@ -116,7 +116,7 @@ class Application(tk.Tk):
         for key, data in self.sessionpars_model.fields.items():
             vartype = vartypes.get(data['type'], tk.StringVar)
             self.sessionpars[key] = vartype(value=data['value'])
-        print("App:102: Loaded sessionpars model fields into running sessionpars dict")
+        print("App:119: Loaded sessionpars model fields into running sessionpars dict")
 
         # Put a trace on the variables so they get stored when changed.
         #for var in self.sessionpars.values():
@@ -136,9 +136,9 @@ class Application(tk.Tk):
         print(f"App_136: Audio files path: {self.sessionpars['Audio Files Path'].get()}")
         self._audio_list = self.audiolist_model.fields['Audio List']
         if len(self._audio_list) > 0:
-            print("App:136: Loaded randomized audio files from AudioList model into running list")
+            print("App:139: Loaded randomized audio files from AudioList model into running list")
         else:
-            print("App_138: No audio files in list!")
+            print("App_141: No audio files in list!")
             messagebox.showwarning(
                 title="No path selected",
                 message="Please use File>Session to selected a valid audio file directory!"
@@ -149,7 +149,11 @@ class Application(tk.Tk):
         """ Save trial ratings, update trial counter,
             and reset sliders.
          """
+        # Get _vars from main_frame view
         data = self.main_frame.get()
+        # Update _vars with current audio file name
+        data["Audio Filename"] = self._audio_list[self._records_saved]
+        # Pass data dict to CSVModel for saving
         self.model.save_record(data)
         self._records_saved += 1
         self.status.set(f"Trials Completed: {self._records_saved}")
@@ -160,13 +164,15 @@ class Application(tk.Tk):
         """ Get next .wav file name and present audio """
         # If empty files list, try loading again
         if len(self._audio_list) == 0:
-            print("App_180: Empty list - attempting to load audio files from directory")
+            print("App_163: Empty list - attempting to load audio files from directory")
             self._load_audiolist_model()
 
         if len(self._audio_list) > 0:
             # Check index of next file with list
             if self._records_saved < len(self._audio_list):
                 file_path = self.sessionpars['Audio Files Path'].get() + os.sep + self._audio_list[self._records_saved]
+                # Update CSVModel with audio file name
+
                 # Audio object expects a full file path and a presentation level
                 audio_obj = m.Audio(file_path, self.sessionpars['Presentation Level'].get())
                 audio_obj.play()

@@ -52,7 +52,8 @@ class CSVModel:
     # Data dictionary
     fields = {
         "Awareness Rating": {'req': True, 'type': FT.decimal},
-        "Acceptability Rating": {'req': True, 'type': FT.decimal}
+        "Acceptability Rating": {'req': True, 'type': FT.decimal},
+        "Audio Filename": {'req': True}
         }
 
     
@@ -97,7 +98,11 @@ class CSVModel:
 
         # Create new field for trailing underscore naming
         # See naming convention info above
-
+        # Take everything after the last underscore
+        filename_val = all_data["audio_filename"].split("_")[-1]
+        # Remove .wav file extension
+        filename_val = filename_val[:-4]
+        all_data["filename_value"] = filename_val
 
         # Save combined dict to file
         newfile = not self.file.exists()
@@ -149,14 +154,14 @@ class SessionParsModel:
 
     def save(self):
         """ Save the current settings to the file """
-        print("Models_98: Writing session pars from model to file...")
+        print("Models_153: Writing session pars from model to file...")
         with open(self.filepath, 'w') as fh:
             json.dump(self.fields, fh)
         
     
     def set(self, key, value):
         """ Set a variable value """
-        print("Models_105: Setting sessionpars model fields with running vals...")
+        print("Models_160: Setting sessionpars model fields with running vals...")
         if (
             key in self.fields and 
             type(value).__name__ == self.fields[key]['type']
