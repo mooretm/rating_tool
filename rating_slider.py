@@ -6,8 +6,8 @@
 
     Version 1.0.0
     Written by: Travis M. Moore
-    Created: Jun 29, 2022
-    Last Edited: Jul 11, 2022
+    Created: 29 Jun, 2022
+    Last Edited: 23 Aug, 2022
 """
 
 # Import GUI packages
